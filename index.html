@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0614" />
+  <meta name="description" content="A little birthday surprise, made just for you." />
+  <title>A Little Surprise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <canvas id="starfield"></canvas>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+    <div class="glow glow-c"></div>
+    <div id="fx-layer" class="fx-layer"></div>
+    <div id="balloon-layer" class="balloon-layer"></div>
+    <div id="cursor-trail" class="cursor-trail"></div>
+  </div>
+
+  <div id="cinematic-veil" class="cinematic-veil" aria-hidden="true">
+    <div class="cine-stars" id="cine-stars"></div>
+    <div class="cine-glow"></div>
+    <p class="cine-name" id="cine-name"></p>
+  </div>
+
+  <div id="day-badge" class="day-badge" hidden></div>
+
+  <button
+    type="button"
+    id="music-toggle"
+    class="music-toggle"
+    aria-label="Toggle music"
+    aria-pressed="false"
+    hidden
+  >
+    <span class="music-eq" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </span>
+    <span class="music-icon" aria-hidden="true">🔇</span>
+  </button>
+
+  <div id="lyrics-bar" class="lyrics-bar" hidden aria-live="polite">
+    <p id="lyrics-line" class="lyrics-line"></p>
+  </div>
+
+  <div id="sparkle-rain" class="sparkle-rain" aria-hidden="true"></div>
+  <div id="compliment-rain" class="compliment-rain" aria-hidden="true"></div>
+  <div id="catch-star" class="catch-star" hidden aria-hidden="true">✦</div>
+
+  <nav id="progress" class="progress" aria-label="Story progress" hidden>
+    <!-- dots filled by script -->
+  </nav>
+
+  <main id="app" class="app">
+    <!-- Scene 1: Cinematic Intro -->
+    <section id="scene-1" class="scene scene-active" aria-label="Introduction" data-scene="1" data-transition="cinematic">
+      <div class="scene-inner intro-inner">
+        <p class="line line-delay-1 intro-line" data-reveal id="intro-hey">Hey, <span class="accent-name" data-her-name></span>...</p>
+        <p class="line line-soft line-delay-2 intro-line" data-reveal id="intro-made">I made something for you.</p>
+        <p class="line line-soft line-delay-3 intro-line" data-reveal>Because today is a little more special than usual.</p>
+        <button type="button" id="btn-open-surprise" class="btn btn-primary btn-delay" data-next="2" data-start-music data-burst>
+          Open Your Surprise <span aria-hidden="true">✨</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scene 2: Happy Birthday -->
+    <section id="scene-2" class="scene" aria-label="Happy Birthday" hidden data-scene="2" data-transition="zoom">
+      <div class="scene-inner">
+        <h1 class="cinematic-title" data-reveal>
+          Happy Birthday, <span class="accent-name" data-her-name></span>
+          <span class="heart-mark" aria-hidden="true">❤️</span>
+        </h1>
+        <p class="date-line" data-reveal data-config="birthdayDate"></p>
+        <p class="shooting-hint line-soft" data-reveal>Look — a little magic in the sky</p>
+
+        <div id="name-constellation" class="name-constellation" aria-hidden="true">
+          <canvas id="constellation-canvas"></canvas>
+          <p class="constellation-caption">Your name, written in the stars</p>
+        </div>
+
+        <div id="heart-sky" class="heart-sky" hidden>
+          <p class="heart-sky-prompt">Now tap the stars — build a heart for you</p>
+          <div id="heart-points" class="heart-points" role="group" aria-label="Heart constellation"></div>
+          <p id="heart-progress" class="heart-progress" aria-live="polite">0 / 8 stars lit</p>
+          <p id="heart-unlock" class="heart-unlock" hidden></p>
+        </div>
+
+        <div id="countdown-block" class="countdown-block" data-reveal hidden>
+          <p class="countdown-label" id="countdown-label">Something special is coming...</p>
+          <div class="countdown-grid" id="countdown-grid" aria-live="polite">
+            <div class="countdown-unit"><span id="cd-days">0</span><small>Days</small></div>
+            <div class="countdown-unit"><span id="cd-hours">0</span><small>Hours</small></div>
+            <div class="countdown-unit"><span id="cd-mins">0</span><small>Minutes</small></div>
+            <div class="countdown-unit"><span id="cd-secs">0</span><small>Seconds</small></div>
+          </div>
+          <p class="countdown-static" id="countdown-static" hidden></p>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-delay" data-next="3" data-burst>
+          There's something I want to show you <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scene 3: Personal Message -->
+    <section id="scene-3" class="scene" aria-label="Personal message" hidden data-scene="3" data-transition="fade">
+      <div class="scene-inner">
+        <p class="line line-soft" data-reveal>Ready, <span class="accent-name" data-her-name></span>?</p>
+        <div class="glass-card" data-reveal>
+          <h2 class="card-title">A little message for you...</h2>
+          <p id="typed-message" class="typed-message" aria-live="polite"></p>
+          <span id="type-cursor" class="type-cursor" aria-hidden="true">|</span>
+        </div>
+        <button type="button" id="btn-keep-going" class="btn btn-primary" data-next="4" data-burst hidden>
+          Keep going <span aria-hidden="true">💫</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scene 4: Photo Reveal + gift unwrap -->
+    <section id="scene-4" class="scene" aria-label="Photo reveal" hidden data-scene="4" data-transition="blur">
+      <div class="scene-inner">
+        <p class="line line-soft" id="photo-line-1" data-reveal>Okay...</p>
+        <p class="line" id="photo-line-2" data-reveal hidden>Now for the most important part.</p>
+
+        <div id="gift-wrap" class="gift-wrap" hidden>
+          <button type="button" id="btn-unwrap" class="gift-box" aria-label="Unwrap your gift" data-burst>
+            <span class="gift-lid" aria-hidden="true"></span>
+            <span class="gift-body" aria-hidden="true"></span>
+            <span class="gift-bow" aria-hidden="true"></span>
+            <span class="gift-label">Tap to unwrap</span>
+          </button>
+        </div>
+
+        <div id="photo-stage" class="photo-stage" hidden>
+          <div class="photo-vignette" aria-hidden="true"></div>
+          <div class="photo-orbit" id="photo-orbit" aria-hidden="true"></div>
+          <figure id="photo-frame" class="photo-frame" hidden>
+            <div class="photo-glow" aria-hidden="true"></div>
+            <div class="photo-parallax" id="photo-parallax">
+              <img
+                id="her-photo"
+                class="her-photo"
+                src="assets/her-photo.jpg"
+                alt="A special photo"
+                width="278"
+                height="661"
+              />
+            </div>
+            <div id="photo-fallback" class="photo-fallback" hidden>
+              <span class="fallback-initial" aria-hidden="true">✦</span>
+              <span class="fallback-label">A moment just for you</span>
+            </div>
+          </figure>
+        </div>
+        <p id="photo-caption" class="photo-caption" hidden>
+          <span aria-hidden="true">✨</span>
+          <span data-her-name></span>
+          <span aria-hidden="true">✨</span>
+        </p>
+        <p id="photo-sub" class="line line-soft" hidden>Someone worth celebrating.</p>
+        <p id="photo-secret" class="photo-secret" hidden></p>
+        <p id="photo-secret-hint" class="photo-secret-hint" hidden>Double-tap the photo for a secret</p>
+        <button type="button" id="btn-theres-more" class="btn btn-primary" data-next="5" data-burst hidden>
+          There's more <span aria-hidden="true">❤️</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scene 5: Little Secret -->
+    <section id="scene-5" class="scene" aria-label="A little secret" hidden data-scene="5" data-transition="fade">
+      <div class="scene-inner">
+        <p class="line" id="secret-wait" data-reveal>Wait...</p>
+        <p class="line line-soft" id="secret-forgot" data-reveal hidden>I forgot one thing.</p>
+        <button type="button" id="btn-little-secret" class="btn btn-primary" data-burst hidden>
+          There's a little secret <span aria-hidden="true">👀</span>
+        </button>
+        <div id="secret-reveal" class="secret-reveal" hidden>
+          <p class="line secret-line-1" id="secret-line-1"></p>
+          <p class="line line-soft secret-line-2 heartbeat" id="secret-line-2" hidden></p>
+          <button type="button" id="btn-after-secret" class="btn btn-primary" data-next="6" data-burst hidden>
+            Continue <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 6: Why She's Special (existing cards) -->
+    <section id="scene-6" class="scene" aria-label="Things that make you special" hidden data-scene="6" data-transition="slide">
+      <div class="scene-inner scene-inner-wide">
+        <h2 class="section-title" data-reveal>Things that make you special <span aria-hidden="true">💖</span></h2>
+        <p id="cards-progress" class="cards-progress" aria-live="polite">Tap each one to open</p>
+        <div id="special-cards" class="special-cards" role="list"></div>
+        <p id="cards-complete" class="cards-complete" hidden>All of them — just like you. Unforgettable.</p>
+        <button type="button" id="btn-after-cards" class="btn btn-primary" data-next="7" data-burst disabled>
+          Continue <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scene 7: Little Things I Notice -->
+    <section id="scene-7" class="scene" aria-label="Little things I notice" hidden data-scene="7" data-transition="card-flip">
+      <div class="scene-inner scene-inner-wide">
+        <h2 class="section-title" data-reveal>Little Things I Notice</h2>
+        <p class="line-soft" data-reveal>Tap a card to reveal ✨</p>
+        <div id="notice-cards" class="notice-cards" role="list"></div>
+        <button type="button" id="btn-after-notice" class="btn btn-primary" data-next="8" data-burst disabled>
+          Keep going <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scene 8: Choose One + Mystery Doors -->
+    <section id="scene-8" class="scene" aria-label="Playful question" hidden data-scene="8" data-transition="fade">
+      <div class="scene-inner">
+        <div id="choose-stage">
+          <p class="line" data-reveal>Okay, serious question...</p>
+          <p class="line line-soft" data-reveal>What do you think I like most about you?</p>
+          <div id="choose-options" class="choose-options" data-reveal>
+            <button type="button" class="btn btn-ghost choose-btn" data-choice="smile" data-burst>Your smile 😊</button>
+            <button type="button" class="btn btn-ghost choose-btn" data-choice="eyes" data-burst>Your eyes 👀</button>
+            <button type="button" class="btn btn-ghost choose-btn" data-choice="personality" data-burst>Your personality ✨</button>
+          </div>
+          <div id="choose-response" class="choose-response" hidden>
+            <p class="line" id="choose-line-1"></p>
+            <p class="line line-soft" id="choose-line-2" hidden></p>
+          </div>
+        </div>
+
+        <div id="door-stage" class="door-stage" hidden>
+          <p class="line">One more game...</p>
+          <p class="line line-soft">Pick a door. Only one holds the real surprise.</p>
+          <div id="mystery-doors" class="mystery-doors" role="group" aria-label="Mystery doors">
+            <button type="button" class="mystery-door" data-door="0" aria-label="Door 1">
+              <span class="door-face" aria-hidden="true"></span>
+              <span class="door-number">1</span>
+            </button>
+            <button type="button" class="mystery-door" data-door="1" aria-label="Door 2">
+              <span class="door-face" aria-hidden="true"></span>
+              <span class="door-number">2</span>
+            </button>
+            <button type="button" class="mystery-door" data-door="2" aria-label="Door 3">
+              <span class="door-face" aria-hidden="true"></span>
+              <span class="door-number">3</span>
+            </button>
+          </div>
+          <p id="door-reveal" class="door-reveal" hidden aria-live="polite"></p>
+
+          <div id="orb-stage" class="orb-stage" hidden>
+            <p class="line">One glowing truth...</p>
+            <p class="line line-soft">Tap the orb — it only opens for you</p>
+            <button type="button" id="btn-orb" class="magic-orb" aria-label="Open the magic orb" data-burst>
+              <span class="orb-core" aria-hidden="true"></span>
+              <span class="orb-ring orb-ring-a" aria-hidden="true"></span>
+              <span class="orb-ring orb-ring-b" aria-hidden="true"></span>
+              <span class="orb-spark" aria-hidden="true">✦</span>
+              <span class="orb-label">Tap me</span>
+            </button>
+            <p id="orb-reveal" class="orb-reveal" hidden aria-live="polite"></p>
+          </div>
+
+          <button type="button" id="btn-after-doors" class="btn btn-primary" data-next="9" data-burst hidden>
+            Keep the magic going <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 9: Star wishes + birthday fortune -->
+    <section id="scene-9" class="scene" aria-label="Wishes for you" hidden data-scene="9" data-transition="fade">
+      <div class="scene-inner scene-inner-wide">
+        <h2 class="section-title" data-reveal>Wishes written in the stars</h2>
+        <p class="line-soft" data-reveal>Tap each star to collect a wish</p>
+        <div id="wish-sky" class="wish-sky" role="list"></div>
+        <p id="wish-reveal" class="wish-reveal" aria-live="polite"></p>
+
+        <div id="fortune-stage" class="fortune-stage" hidden>
+          <p class="line" data-reveal>Wait — one more surprise</p>
+          <p class="line line-soft">Pull a birthday fortune</p>
+          <button type="button" id="btn-fortune" class="fortune-card" aria-label="Reveal your birthday fortune" data-burst>
+            <span class="fortune-shimmer" aria-hidden="true"></span>
+            <span class="fortune-front">
+              <span class="fortune-icon">✦</span>
+              <span class="fortune-prompt">Tap to open</span>
+            </span>
+            <span class="fortune-back" id="fortune-text" hidden></span>
+          </button>
+        </div>
+
+        <div id="sparkler-stage" class="sparkler-stage" hidden>
+          <p class="line">One more spark...</p>
+          <p class="line line-soft">Light this for a little extra magic</p>
+          <button type="button" id="btn-sparkler" class="sparkler-btn" aria-label="Light the birthday sparkler" data-burst>
+            <span class="sparkler-stick" aria-hidden="true"></span>
+            <span class="sparkler-head" aria-hidden="true"></span>
+            <span class="sparkler-embers" id="sparkler-embers" aria-hidden="true"></span>
+            <span class="sparkler-label">Tap to light</span>
+          </button>
+          <p id="sparkler-message" class="sparkler-message" hidden></p>
+        </div>
+
+        <button type="button" id="btn-after-wishes" class="btn btn-primary" data-next="10" data-burst hidden>
+          Time for cake <span aria-hidden="true">🎂</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Scene 10: Birthday Cake -->
+    <section id="scene-10" class="scene" aria-label="Birthday cake" hidden data-scene="10" data-transition="cinematic">
+      <div class="scene-inner">
+        <div id="cake-preamble" class="cake-preamble">
+          <p class="line" id="cake-line-1" data-reveal>Alright, <span class="accent-name" data-her-name></span>...</p>
+          <p class="line line-soft" id="cake-line-2" data-reveal>Time for the birthday part <span aria-hidden="true">🎂</span></p>
+          <p class="line cinematic-whisper" id="cake-close-eyes" hidden>Close your eyes...</p>
+          <p class="line" id="cake-open-eyes" hidden>Okay, open them. <span aria-hidden="true">🎂</span></p>
+        </div>
+
+        <div class="cake-stage" id="cake-stage-wrap" hidden aria-hidden="true">
+          <div class="cake-particles" id="cake-particles" aria-hidden="true"></div>
+          <div class="cake" id="birthday-cake">
+            <div class="cake-top">
+              <div class="candle" data-candle>
+                <div class="flame"></div>
+                <div class="wick"></div>
+                <div class="smoke"></div>
+              </div>
+              <div class="candle" data-candle>
+                <div class="flame"></div>
+                <div class="wick"></div>
+                <div class="smoke"></div>
+              </div>
+              <div class="candle" data-candle>
+                <div class="flame"></div>
+                <div class="wick"></div>
+                <div class="smoke"></div>
+              </div>
+            </div>
+            <div class="frosting"></div>
+            <div class="layer layer-1"></div>
+            <div class="layer layer-2"></div>
+            <div class="plate"></div>
+          </div>
+        </div>
+
+        <p class="wish-text" id="wish-text" hidden>Make a wish...</p>
+        <p id="blow-hint" class="blow-hint" hidden>Blow into your mic — or tap below</p>
+        <div id="blow-meter" class="blow-meter" hidden aria-hidden="true">
+          <span id="blow-meter-fill" class="blow-meter-fill"></span>
+        </div>
+        <p id="wish-locked" class="wish-locked" hidden>Your wish is locked in the stars ✦</p>
+        <button type="button" id="btn-blow" class="btn btn-primary" data-burst hidden>
+          Make a wish <span aria-hidden="true">✨</span>
+        </button>
+      </div>
+
+      <div id="hb-burst" class="hb-burst" hidden aria-live="assertive">
+        <p class="hb-burst-kicker">Wish granted</p>
+        <h2 class="hb-burst-title">Happy Birthday</h2>
+        <p class="hb-burst-name"><span data-her-name></span> <span aria-hidden="true">❤️</span></p>
+        <p class="hb-burst-sub">Today is all yours ✦</p>
+        <p class="hb-burst-sing" id="hb-sing-along" hidden>Sing along — the song is for you</p>
+        <div id="hb-more-wrap" class="hb-more-wrap" hidden>
+          <p class="hb-burst-more">This isn’t the end…</p>
+          <p class="hb-burst-more-sub">There’s still more waiting for you</p>
+          <button type="button" id="btn-after-wish" class="btn btn-primary hb-continue-btn" data-burst>
+            Keep going <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 11: Envelope Letter -->
+    <section id="scene-11" class="scene" aria-label="Final letter" hidden data-scene="11" data-transition="envelope">
+      <div class="scene-inner">
+        <p class="line" data-reveal>One last thing, <span class="accent-name" data-her-name></span>...</p>
+        <p class="line line-soft" data-reveal>Open this <span aria-hidden="true">❤️</span></p>
+
+        <button type="button" id="btn-open-letter" class="envelope" aria-label="Open the letter" data-burst>
+          <span class="envelope-flap" aria-hidden="true"></span>
+          <span class="envelope-body" aria-hidden="true"></span>
+          <span class="envelope-heart" aria-hidden="true">♥</span>
+          <span class="envelope-label">Tap to open</span>
+        </button>
+
+        <div id="letter-card" class="letter-card" hidden>
+          <p id="letter-body" class="letter-body"></p>
+          <p class="letter-sign signature" id="letter-sign" hidden>— <span data-your-name></span></p>
+        </div>
+
+        <div id="scene-11-continue" hidden>
+          <p class="line cinematic-line" data-config="finalLine1"></p>
+          <p class="line line-soft cinematic-line" data-config="finalLine2"></p>
+          <button type="button" class="btn btn-ghost" data-next="12" data-burst>
+            One last thing...
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 12: Grand finale -->
+    <section id="scene-12" class="scene" aria-label="Grand finale" hidden data-scene="12" data-transition="zoom">
+      <div class="scene-inner finale-inner">
+        <canvas id="finale-canvas" class="finale-canvas" aria-hidden="true"></canvas>
+
+        <p class="line" id="last-prompt" data-reveal>One last thing...</p>
+        <div class="finale-aurora" id="finale-aurora" aria-hidden="true"></div>
+        <p class="finale-glow-name" id="finale-name" hidden>
+          <span class="finale-name-orbit" aria-hidden="true"></span>
+          <span data-her-name></span>
+        </p>
+        <p class="final-heart-line" id="last-message" hidden></p>
+
+        <button type="button" id="finale-heart-btn" class="finale-heart-btn" hidden aria-label="Tap the heart">
+          <span class="finale-heart-glow" aria-hidden="true"></span>
+          <span class="finale-heart-icon" aria-hidden="true">❤️</span>
+        </button>
+        <div id="finale-heart-burst" class="finale-heart-burst" hidden aria-live="polite">
+          <p class="line">Happy Birthday <span aria-hidden="true">❤️</span></p>
+          <p class="finale-glow-name"><span data-her-name></span></p>
+          <p class="signature" id="finale-sign" hidden>— <span data-your-name></span></p>
+        </div>
+
+        <div id="promise-deck" class="promise-deck" hidden>
+          <p class="promise-label">Promises for your year</p>
+          <button type="button" id="promise-card" class="promise-card" aria-live="polite">
+            <span id="promise-text"></span>
+            <span class="promise-nav" aria-hidden="true">tap for next →</span>
+          </button>
+          <div id="promise-dots" class="promise-dots" aria-hidden="true"></div>
+        </div>
+
+        <div id="memory-lane" class="memory-lane" hidden>
+          <p class="memory-label">Little moments worth keeping</p>
+          <div id="memory-track" class="memory-track" role="list"></div>
+        </div>
+
+        <div id="lantern-stage" class="lantern-stage" hidden>
+          <p class="lantern-prompt">Release a lantern into the sky</p>
+          <button type="button" id="btn-lantern" class="btn btn-ghost btn-lantern" data-burst>
+            Light a lantern <span aria-hidden="true">🏮</span>
+          </button>
+          <div id="lantern-sky" class="lantern-sky" aria-hidden="true"></div>
+        </div>
+
+        <button
+          type="button"
+          id="secret-heart"
+          class="secret-heart"
+          hidden
+          aria-label="Hold for a secret message"
+        >
+          <span class="secret-fill" aria-hidden="true"></span>
+          <span class="secret-icon" aria-hidden="true">♡</span>
+          <span class="secret-hint">Hold for a secret</span>
+          <span class="secret-ring" aria-hidden="true"></span>
+        </button>
+        <p id="secret-message" class="secret-message" hidden></p>
+
+        <p id="closing-blessing" class="closing-blessing" hidden data-config="closingBlessing"></p>
+
+        <div id="finale-actions" class="finale-actions" hidden>
+          <button type="button" class="btn btn-primary" data-next="13" data-burst>
+            I have one more gift for you <span aria-hidden="true">💐</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 13: Animated Man Sitting & Giving Beautiful Flower Bouquet -->
+    <section id="scene-13" class="scene" aria-label="Flower Bouquet Surprise" hidden data-scene="13" data-transition="zoom">
+      <div class="scene-inner finale-inner">
+        <h2 class="section-title" data-reveal>A Special Gift Just For You 🌸</h2>
+        <p class="line-soft mb-2" data-reveal>Someone has a special delivery for this magical day...</p>
+        
+        <!-- Speech Wish Bubble from the Man -->
+        <div id="char-speech-bubble" class="char-speech-bubble" hidden>
+          <div class="speech-avatar" aria-hidden="true">💝</div>
+          <p class="speech-tag">Special Birthday Delivery</p>
+          <h3 class="speech-title">
+            Happy Birthday, <span class="heart-mark pulse-heart" aria-hidden="true">❤️</span> <span class="accent-name" data-her-name></span>!
+          </h3>
+          <p class="speech-message" id="speech-message-text">
+            "I brought this beautiful bouquet just for you! May your days always bloom with happiness, love, and sunshine."
+          </p>
+          <button type="button" id="btn-take-bouquet" class="btn btn-primary btn-take-bouquet" data-burst>
+            Take the Bouquet <span aria-hidden="true">💐</span>
+          </button>
+        </div>
+
+        <!-- Animated Man Sitting & Offering Bouquet -->
+        <div id="bouquet-stage" class="bouquet-stage" hidden>
+          <svg class="man-bouquet-svg" viewBox="0 0 380 370" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Gradients for illustration -->
+              <radialGradient id="groundGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#f2a7c3" stop-opacity="0.4" />
+                <stop offset="60%" stop-color="#c4a8e8" stop-opacity="0.18" />
+                <stop offset="100%" stop-color="#12081f" stop-opacity="0" />
+              </radialGradient>
+              <linearGradient id="coatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2a2046" />
+                <stop offset="50%" stop-color="#1e1735" />
+                <stop offset="100%" stop-color="#140f24" />
+              </linearGradient>
+              <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffdfcb" />
+                <stop offset="100%" stop-color="#f7c29e" />
+              </linearGradient>
+              <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3d271e" />
+                <stop offset="60%" stop-color="#261711" />
+                <stop offset="100%" stop-color="#180e0a" />
+              </linearGradient>
+              <linearGradient id="wrapInner" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#fdf2f8" />
+                <stop offset="100%" stop-color="#fce7f3" />
+              </linearGradient>
+              <linearGradient id="wrapFoldLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fbcfe8" />
+                <stop offset="100%" stop-color="#f472b6" />
+              </linearGradient>
+              <linearGradient id="wrapFoldRight" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f472b6" />
+                <stop offset="100%" stop-color="#db2777" />
+              </linearGradient>
+              <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fb7185" />
+                <stop offset="50%" stop-color="#e11d48" />
+                <stop offset="100%" stop-color="#be123c" />
+              </linearGradient>
+              <radialGradient id="roseRed" cx="45%" cy="40%" r="55%">
+                <stop offset="0%" stop-color="#ff4d6d" />
+                <stop offset="50%" stop-color="#c9184a" />
+                <stop offset="100%" stop-color="#800f2f" />
+              </radialGradient>
+              <radialGradient id="rosePink" cx="45%" cy="40%" r="55%">
+                <stop offset="0%" stop-color="#ff85a2" />
+                <stop offset="60%" stop-color="#f43f5e" />
+                <stop offset="100%" stop-color="#9f1239" />
+              </radialGradient>
+              <radialGradient id="peonyPink" cx="50%" cy="45%" r="50%">
+                <stop offset="0%" stop-color="#fdf2f8" />
+                <stop offset="50%" stop-color="#f472b6" />
+                <stop offset="100%" stop-color="#be185d" />
+              </radialGradient>
+              <radialGradient id="sunDaisy" cx="45%" cy="45%" r="50%">
+                <stop offset="0%" stop-color="#fef08a" />
+                <stop offset="60%" stop-color="#facc15" />
+                <stop offset="100%" stop-color="#ca8a04" />
+              </radialGradient>
+              <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#86efac" />
+                <stop offset="60%" stop-color="#22c55e" />
+                <stop offset="100%" stop-color="#15803d" />
+              </linearGradient>
+            </defs>
+
+            <!-- Ambient Seating Glow & Soft Shadow -->
+            <ellipse cx="190" cy="340" rx="145" ry="24" fill="url(#groundGlow)" />
+            <ellipse cx="190" cy="342" rx="95" ry="14" fill="rgba(12, 7, 24, 0.75)" />
+
+            <!-- Sitting Legs / Trousers -->
+            <g class="man-legs">
+              <!-- Left bent knee & thigh -->
+              <path d="M120 280 C98 296 82 322 104 340 C124 350 166 346 186 332 C172 310 146 284 120 280 Z" fill="#201a38" />
+              <path d="M112 312 C104 326 110 336 124 342 C138 346 158 342 168 335" stroke="#2e254f" stroke-width="2.2" stroke-linecap="round" fill="none" />
+              <!-- Right bent knee & thigh -->
+              <path d="M260 280 C282 296 298 322 276 340 C256 350 214 346 194 332 C208 310 234 284 260 280 Z" fill="#1b1530" />
+              <path d="M268 312 C276 326 270 336 256 342 C242 346 222 342 212 335" stroke="#281f44" stroke-width="2.2" stroke-linecap="round" fill="none" />
+              <!-- Shoes tucked comfortably -->
+              <ellipse cx="116" cy="344" rx="17" ry="8" fill="#110c1f" />
+              <ellipse cx="264" cy="344" rx="17" ry="8" fill="#110c1f" />
+            </g>
+
+            <!-- Body & Torso -->
+            <g class="man-torso">
+              <path d="M142 210 C140 175 160 168 190 168 C220 168 240 175 238 210 L246 295 C246 312 230 322 190 322 C150 322 134 312 134 295 Z" fill="url(#coatGrad)" />
+              <!-- Shirt collar -->
+              <polygon points="182,168 198,168 190,188" fill="#ffffff" />
+              <polygon points="188,185 192,185 190,205" fill="#f43f5e" />
+              <!-- Lapels with rose-gold trim -->
+              <path d="M164 168 L185 215 L177 218 L150 180 Z" fill="#2d224d" stroke="#e8c98a" stroke-width="1.2" />
+              <path d="M216 168 L195 215 L203 218 L230 180 Z" fill="#281e45" stroke="#e8c98a" stroke-width="1.2" />
+            </g>
+
+            <!-- Head, Hair & Smiling Face -->
+            <g class="man-head-group">
+              <rect x="181" y="145" width="18" height="28" rx="5" fill="url(#skinGrad)" />
+              <!-- Face contour -->
+              <path d="M162 110 C162 78 218 78 218 110 C218 142 190 155 190 155 C190 155 162 142 162 110 Z" fill="url(#skinGrad)" />
+              <!-- Ears -->
+              <ellipse cx="160" cy="115" rx="5" ry="8" fill="#f7c29e" />
+              <ellipse cx="220" cy="115" rx="5" ry="8" fill="#f7c29e" />
+              <!-- Rosy blushing cheeks -->
+              <ellipse cx="172" cy="122" rx="9" ry="5" fill="#ff758f" opacity="0.65" />
+              <ellipse cx="208" cy="122" rx="9" ry="5" fill="#ff758f" opacity="0.65" />
+              <!-- Warm smile -->
+              <path d="M183 133 Q190 141 197 133" stroke="#e11d48" stroke-width="2.5" stroke-linecap="round" fill="none" />
+              <!-- Cute nose -->
+              <circle cx="190" cy="122" r="1.5" fill="#e5989b" />
+              <!-- Eyes with gentle blink animation -->
+              <g class="man-eyes">
+                <!-- Left Eye -->
+                <path class="eye-stroke" d="M172 114 Q178 108 184 114" stroke="#251610" stroke-width="2.8" stroke-linecap="round" fill="none" />
+                <circle class="eye-pupil" cx="178" cy="114" r="2.2" fill="#251610" />
+                <circle class="eye-shine" cx="177" cy="113" r="0.8" fill="#ffffff" />
+                <!-- Right Eye -->
+                <path class="eye-stroke" d="M196 114 Q202 108 208 114" stroke="#251610" stroke-width="2.8" stroke-linecap="round" fill="none" />
+                <circle class="eye-pupil" cx="202" cy="114" r="2.2" fill="#251610" />
+                <circle class="eye-shine" cx="201" cy="113" r="0.8" fill="#ffffff" />
+              </g>
+              <!-- Eyebrows -->
+              <path d="M170 106 Q177 103 184 107" stroke="#3d271e" stroke-width="1.8" stroke-linecap="round" fill="none" />
+              <path d="M196 107 Q203 103 210 106" stroke="#3d271e" stroke-width="1.8" stroke-linecap="round" fill="none" />
+              <!-- Fluffy stylized hair -->
+              <path d="M157 106 C150 78 170 56 190 56 C215 56 230 72 223 102 C218 84 205 76 190 76 C174 76 163 88 157 106 Z" fill="url(#hairGrad)" />
+              <path d="M162 92 C172 84 186 96 182 108 C185 96 200 90 216 100 C210 90 200 82 188 84 C175 84 167 88 162 92 Z" fill="url(#hairGrad)" />
+              <path d="M156 104 C158 116 164 122 164 122 C162 114 160 106 156 104 Z" fill="url(#hairGrad)" />
+              <path d="M224 104 C222 116 216 122 216 122 C218 114 220 106 224 104 Z" fill="url(#hairGrad)" />
+              <path d="M175 68 Q190 62 205 68" stroke="#784931" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.75" />
+
+              <!-- Celebrate Hearts (Appears when bouquet is accepted) -->
+              <g class="man-celebrate-hearts">
+                <text x="146" y="52" class="head-heart h1" font-size="20">💖</text>
+                <text x="216" y="48" class="head-heart h2" font-size="20">💕</text>
+              </g>
+            </g>
+
+            <!-- Offering Arms & The Beautiful Bouquet (Animated) -->
+            <g class="offering-group">
+              <!-- Arms holding bouquet -->
+              <path d="M142 195 C140 220 152 245 168 252 L174 240 C162 232 152 215 152 195 Z" fill="#201a38" />
+              <path d="M238 195 C240 220 228 245 212 252 L206 240 C218 232 228 215 228 195 Z" fill="#1b1530" />
+              <ellipse cx="168" cy="254" rx="8" ry="6" fill="#f7c29e" transform="rotate(-15 168 254)" />
+              <ellipse cx="212" cy="254" rx="8" ry="6" fill="#f7c29e" transform="rotate(15 212 254)" />
+
+              <!-- The Gorgeous Floral Bouquet -->
+              <g class="magnificent-bouquet">
+                <!-- Wrap Base & Conical folds -->
+                <polygon points="190,274 125,180 255,180" fill="url(#wrapInner)" />
+                <path d="M190 275 L128 185 C145 178 175 185 190 215 Z" fill="url(#wrapFoldLeft)" />
+                <path d="M190 275 L252 185 C235 178 205 185 190 215 Z" fill="url(#wrapFoldRight)" />
+                <path d="M190 275 L135 187" stroke="#e8c98a" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.85" />
+                <path d="M190 275 L245 187" stroke="#e8c98a" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.85" />
+
+                <!-- Tied Satin Ribbon Bow -->
+                <circle cx="190" cy="252" r="6" fill="url(#ribbonGrad)" />
+                <circle cx="190" cy="252" r="2.5" fill="#fde047" />
+                <path d="M190 252 C172 242 168 262 190 252 Z" fill="url(#ribbonGrad)" />
+                <path d="M190 252 C208 242 212 262 190 252 Z" fill="url(#ribbonGrad)" />
+                <path d="M188 254 C180 270 174 285 168 295" stroke="#f43f5e" stroke-width="3" stroke-linecap="round" fill="none" />
+                <path d="M192 254 C200 270 206 285 212 295" stroke="#f43f5e" stroke-width="3" stroke-linecap="round" fill="none" />
+
+                <!-- Lush Blooming Flowers -->
+                <!-- Greenery & Eucalyptus Leaves -->
+                <path d="M130 180 C110 160 115 140 135 145 C145 155 140 170 130 180 Z" fill="url(#leafGrad)" />
+                <path d="M250 180 C270 160 265 140 245 145 C235 155 240 170 250 180 Z" fill="url(#leafGrad)" />
+                <path d="M190 145 C190 118 185 108 190 108 C195 108 190 118 190 145 Z" fill="url(#leafGrad)" />
+                <circle cx="115" cy="148" r="7" fill="#86efac" opacity="0.9" />
+                <circle cx="265" cy="148" r="7" fill="#86efac" opacity="0.9" />
+
+                <!-- Left Rose -->
+                <g class="flower-rose left-rose">
+                  <circle cx="158" cy="175" r="18" fill="url(#rosePink)" />
+                  <path d="M148 170 C152 163 164 163 168 170 C170 177 164 185 158 185 C152 185 146 177 148 170 Z" fill="#881337" />
+                  <circle cx="158" cy="174" r="5" fill="#f43f5e" />
+                  <circle cx="158" cy="174" r="2" fill="#ffe4e6" />
+                </g>
+
+                <!-- Right Rose -->
+                <g class="flower-rose right-rose">
+                  <circle cx="222" cy="175" r="18" fill="url(#rosePink)" />
+                  <path d="M212 170 C216 163 228 163 232 170 C234 177 228 185 222 185 C216 185 210 177 212 170 Z" fill="#881337" />
+                  <circle cx="222" cy="174" r="5" fill="#f43f5e" />
+                  <circle cx="222" cy="174" r="2" fill="#ffe4e6" />
+                </g>
+
+                <!-- Center Main Velvety Rose -->
+                <g class="flower-rose main-rose">
+                  <circle cx="190" cy="184" r="22" fill="url(#roseRed)" />
+                  <path d="M178 179 C182 171 198 171 202 179 C205 187 198 197 190 197 C182 197 175 187 178 179 Z" fill="#9f1239" />
+                  <path d="M184 181 C186 176 194 176 196 181 C198 186 194 191 190 191 C186 191 182 186 184 181 Z" fill="#e11d48" />
+                  <path d="M188 183 Q190 180 192 183 Q190 186 188 183" fill="#ffe4e6" />
+                  <circle cx="190" cy="184" r="2.5" fill="#fecdd3" />
+                </g>
+
+                <!-- Soft Peonies -->
+                <g class="flower-peony top-peony">
+                  <circle cx="190" cy="142" r="19" fill="url(#peonyPink)" />
+                  <circle cx="190" cy="142" r="13" fill="#f472b6" />
+                  <circle cx="190" cy="142" r="7" fill="#fb7185" />
+                  <circle cx="190" cy="142" r="3" fill="#fef08a" />
+                </g>
+                <g class="flower-peony flank-left">
+                  <circle cx="140" cy="150" r="15" fill="url(#peonyPink)" />
+                  <circle cx="140" cy="150" r="9" fill="#f472b6" />
+                  <circle cx="140" cy="150" r="3" fill="#fef08a" />
+                </g>
+                <g class="flower-peony flank-right">
+                  <circle cx="240" cy="150" r="15" fill="url(#peonyPink)" />
+                  <circle cx="240" cy="150" r="9" fill="#f472b6" />
+                  <circle cx="240" cy="150" r="3" fill="#fef08a" />
+                </g>
+
+                <!-- Sunny Golden Daisies -->
+                <g class="flower-daisy d-left">
+                  <circle cx="166" cy="148" r="14" fill="url(#sunDaisy)" />
+                  <circle cx="166" cy="148" r="6" fill="#78350f" />
+                  <circle cx="166" cy="148" r="3.5" fill="#ca8a04" />
+                </g>
+                <g class="flower-daisy d-right">
+                  <circle cx="214" cy="148" r="14" fill="url(#sunDaisy)" />
+                  <circle cx="214" cy="148" r="6" fill="#78350f" />
+                  <circle cx="214" cy="148" r="3.5" fill="#ca8a04" />
+                </g>
+
+                <!-- Purple Lavender & Baby's Breath -->
+                <circle cx="120" cy="160" r="3.5" fill="#c084fc" />
+                <circle cx="123" cy="153" r="3" fill="#a855f7" />
+                <circle cx="126" cy="146" r="2.5" fill="#c084fc" />
+                <circle cx="260" cy="160" r="3.5" fill="#c084fc" />
+                <circle cx="257" cy="153" r="3" fill="#a855f7" />
+                <circle cx="254" cy="146" r="2.5" fill="#c084fc" />
+                <circle cx="145" cy="132" r="2.5" fill="#ffffff" />
+                <circle cx="178" cy="128" r="3" fill="#ffffff" />
+                <circle cx="205" cy="128" r="3" fill="#ffffff" />
+                <circle cx="235" cy="132" r="2.5" fill="#ffffff" />
+
+                <!-- Floating Petals Drifting Upward -->
+                <g class="floating-petals">
+                  <path class="f-petal p1" d="M125 130 C120 120 135 115 135 125 C135 135 120 135 125 130 Z" fill="#ff758f" />
+                  <path class="f-petal p2" d="M255 125 C265 115 250 110 250 120 C250 130 265 130 255 125 Z" fill="#f43f5e" />
+                  <path class="f-petal p3" d="M190 102 C185 92 200 88 198 98 C196 108 185 108 190 102 Z" fill="#fbcfe8" />
+                </g>
+
+                <!-- Twinkling Sparkles -->
+                <g class="bouquet-sparkles">
+                  <text x="108" y="140" class="b-sparkle bs1" font-size="16">✨</text>
+                  <text x="252" y="135" class="b-sparkle bs2" font-size="16">✨</text>
+                  <text x="186" y="96" class="b-sparkle bs3" font-size="14" fill="#fde047">✦</text>
+                </g>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Grand Finale Happy Birthday Wish with Heart in Front of Her Name -->
+        <div id="final-hb-wish" class="final-hb-wish" hidden>
+          <p class="final-wish-kicker">With all the love & joy</p>
+          <h1 class="cinematic-title">
+            Happy Birthday! <br>
+            <span class="heart-mark pulse-heart" aria-hidden="true">❤️</span> <span class="accent-name" data-her-name></span>
+          </h1>
+          <p class="final-wish-sub">May this year bloom with unforgettable memories, gentle magic, and endless smiles ✨</p>
+        </div>
+        
+        <div id="finale-actions-13" class="finale-actions mt-4" hidden>
+          <button type="button" id="btn-fireworks" class="btn btn-ghost">
+            More fireworks <span aria-hidden="true">✦</span>
+          </button>
+          <button type="button" id="btn-share" class="btn btn-ghost">
+            Share this moment <span aria-hidden="true">↗</span>
+          </button>
+          <button type="button" id="btn-replay" class="btn btn-primary" data-burst>
+            Replay <span aria-hidden="true">↻</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <p class="tap-hint" id="tap-hint" hidden aria-hidden="true">Tap the sky for hearts</p>
+  <p id="easter-toast" class="easter-toast" hidden role="status"></p>
+
+  <div id="logo-egg" class="logo-egg" aria-hidden="true" title="">
+    <span>♥</span>
+  </div>
+
+  <div id="name-fireworks" class="name-fireworks" aria-hidden="true"></div>
+
+  <audio id="bg-music" preload="none" loop></audio>
+  <audio id="celeb-sound" preload="none"></audio>
+  <script src="script.js"></script>
+</body>
+</html>
